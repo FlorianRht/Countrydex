@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { countries } from "@/data/countries";
 import type { CountryType } from "@/lib/types";
 import { TYPE_COLORS } from "@/lib/country-utils";
@@ -70,6 +70,11 @@ export function DexView() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<CountryType | "all">("all");
   const [mode, setMode] = useState<FilterMode>("all");
+
+  useEffect(() => {
+    document.body.style.removeProperty("overflow");
+    document.body.style.removeProperty("height");
+  }, []);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();

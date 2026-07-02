@@ -89,11 +89,16 @@ export function CountryWorldMap({ code, name }: CountryWorldMapProps) {
     };
 
     document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      if (previousOverflow) {
+        document.body.style.overflow = previousOverflow;
+      } else {
+        document.body.style.removeProperty("overflow");
+      }
     };
   }, [expanded]);
 

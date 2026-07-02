@@ -189,14 +189,30 @@ export function StarterPicker() {
   }, [state.success, refreshProfile, router]);
 
   useEffect(() => {
-    if (usernameReady && !mobileDetailsOpen) return;
+    const shouldLock = !usernameReady || mobileDetailsOpen;
+
+    if (!shouldLock) {
+      document.body.style.removeProperty("overflow");
+      return;
+    }
 
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = previous;
+      if (previous) {
+        document.body.style.overflow = previous;
+      } else {
+        document.body.style.removeProperty("overflow");
+      }
     };
   }, [usernameReady, mobileDetailsOpen]);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.removeProperty("overflow");
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedCode) return;

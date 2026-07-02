@@ -84,7 +84,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .dex-shell {
-  overflow: hidden;
   border: 3px solid var(--dex-border);
   border-radius: 1.35rem;
   background: var(--dex-panel-dark);
