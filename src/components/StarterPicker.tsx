@@ -9,6 +9,9 @@ import type { Country } from "@/lib/types";
 import { completeOnboarding, signOut, type AuthActionState } from "@/app/actions/auth";
 import { FlagCircle } from "./FlagCircle";
 import { CountryMap } from "./CountryMap";
+import { CountryNeighbors } from "./CountryNeighbors";
+import { CountryQuickFacts } from "./CountryQuickFacts";
+import { CountryWorldMap } from "./CountryWorldMap";
 import { TypeBadge } from "./TypeBadge";
 import { StatBars } from "./StatBars";
 
@@ -101,7 +104,10 @@ export function StarterPicker() {
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   className="h-full"
                 >
-                  <OriginPreview country={selected} />
+                  <OriginPreview
+                    country={selected}
+                    onSelectNeighbor={setSelectedCode}
+                  />
                 </motion.div>
               ) : (
                 <motion.div
@@ -197,7 +203,13 @@ export function StarterPicker() {
   );
 }
 
-function OriginPreview({ country }: { country: Country }) {
+function OriginPreview({
+  country,
+  onSelectNeighbor,
+}: {
+  country: Country;
+  onSelectNeighbor?: (code: string) => void;
+}) {
   const glow = REGION_GLOW[country.region] ?? "rgba(148, 163, 184, 0.3)";
 
   return (
@@ -208,9 +220,9 @@ function OriginPreview({ country }: { country: Country }) {
         aria-hidden
       />
 
-      <div className="relative grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:min-h-0 xl:flex-1">
-        <div className="flex flex-col p-5 sm:p-6 lg:p-6 xl:min-h-0 xl:overflow-y-auto">
-          <div className="explore-flag-frame relative w-full max-w-xl">
+      <div className="explore-preview-grid relative xl:min-h-0 xl:flex-1">
+        <div className="explore-preview-hero">
+          <div className="explore-flag-frame relative w-full">
             <motion.div
               key={country.code}
               initial={{ opacity: 0, y: 16, scale: 0.97 }}
@@ -229,47 +241,61 @@ function OriginPreview({ country }: { country: Country }) {
             <div className="explore-flag-reflection" aria-hidden />
           </div>
 
-          <div className="mt-4 lg:mt-5">
+          <div className="mt-4">
             <p className="font-mono text-xs tracking-widest text-sky-400/90">
               PAYS D&apos;ORIGINE · #{country.code}
             </p>
-            <h2 className="mt-1.5 text-2xl font-semibold tracking-tight text-white sm:text-3xl xl:text-4xl">
+            <h2 className="mt-1.5 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               {country.name}
             </h2>
-            <p className="mt-2 text-sm text-dex-muted">{country.region}</p>
-            <div className="mt-4 flex flex-wrap gap-1.5">
+            <p className="mt-1.5 text-sm text-dex-muted">{country.region}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {country.types.map((type) => (
                 <TypeBadge key={type} type={type} size="md" />
               ))}
             </div>
           </div>
+
+          <CountryMap
+            code={country.code}
+            name={country.name}
+            fill
+            className="mt-5 min-h-0 flex-1"
+          />
         </div>
 
-        <div className="flex flex-col justify-between border-t border-dex-border/50 bg-black/20 p-5 lg:border-l lg:border-t-0 lg:p-6 xl:min-h-0 xl:overflow-y-auto">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-dex-muted">
-              Entrée Countrydex
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-dex-cream/90">
-              {country.description}
-            </p>
+        <div className="explore-preview-dossier">
+          <section className="explore-preview-section">
+            <h3 className="explore-preview-section-title">Description</h3>
+            <p className="explore-preview-description">{country.description}</p>
+            <CountryQuickFacts country={country} />
+          </section>
 
-            <CountryMap code={country.code} name={country.name} className="mt-5" />
-          </div>
+          <section className="explore-preview-section explore-preview-section-map">
+            <div className="explore-map-row">
+              <CountryWorldMap code={country.code} name={country.name} />
+              <CountryNeighbors
+                country={country}
+                onSelect={onSelectNeighbor}
+                compact
+              />
+            </div>
+          </section>
 
-          <div className="mt-6 space-y-4 lg:mt-4">
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="rounded-lg border border-dex-border/50 bg-dex-panel/40 px-3 py-2.5">
-                <p className="text-dex-muted">Superficie</p>
-                <p className="mt-1 font-mono text-sm text-dex-cream">{country.superficie}</p>
+          <section className="explore-preview-section explore-preview-metrics">
+            <h3 className="explore-preview-section-title">Indicateurs</h3>
+            <div className="explore-preview-facts">
+              <div className="explore-preview-fact">
+                <p className="explore-preview-fact-label">Superficie</p>
+                <p className="explore-preview-fact-value">{country.superficie}</p>
               </div>
-              <div className="rounded-lg border border-dex-border/50 bg-dex-panel/40 px-3 py-2.5">
-                <p className="text-dex-muted">Population</p>
-                <p className="mt-1 font-mono text-sm text-dex-cream">{country.population}</p>
+              <div className="explore-preview-fact">
+                <p className="explore-preview-fact-label">Population</p>
+                <p className="explore-preview-fact-value">{country.population}</p>
               </div>
             </div>
-            <StatBars stats={country.stats} compact />
-          </div>
+            <StatBars stats={country.stats} compact tone="explore" />
+          </section>
         </div>
       </div>
     </article>

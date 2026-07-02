@@ -5,11 +5,12 @@ type CountryMapProps = {
   code: string;
   name: string;
   className?: string;
+  fill?: boolean;
 };
 
-export function CountryMap({ code, name, className = "" }: CountryMapProps) {
+export function CountryMap({ code, name, className = "", fill = false }: CountryMapProps) {
   return (
-    <div className={`explore-country-map ${className}`.trim()}>
+    <div className={`explore-country-map ${fill ? "explore-country-map-fill" : ""} ${className}`.trim()}>
       <p className="explore-country-map-label">Territoire</p>
       <div className="explore-country-map-frame">
         <motion.img

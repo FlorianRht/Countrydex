@@ -16,6 +16,71 @@ export function getCountryByCode(
   return countries.find((c) => c.code.toLowerCase() === code.toLowerCase());
 }
 
+/** Noms pour les pays frontaliers absents du dex (ISO alpha-2). */
+const EXTRA_COUNTRY_NAMES: Record<string, string> = {
+  DE: "Allemagne",
+  BE: "Belgique",
+  LU: "Luxembourg",
+  MC: "Monaco",
+  AD: "Andorre",
+  AT: "Autriche",
+  SI: "Slovénie",
+  SM: "Saint-Marin",
+  VA: "Vatican",
+  LI: "Liechtenstein",
+  AL: "Albanie",
+  MK: "Macédoine du Nord",
+  BG: "Bulgarie",
+  DZ: "Algérie",
+  AR: "Argentine",
+  UY: "Uruguay",
+  PY: "Paraguay",
+  CO: "Colombie",
+  VE: "Venezuela",
+  GY: "Guyana",
+  SR: "Suriname",
+  BO: "Bolivie",
+  MY: "Malaisie",
+  LA: "Laos",
+  KH: "Cambodge",
+  MM: "Myanmar",
+  CN: "Chine",
+  PK: "Pakistan",
+  NP: "Népal",
+  BT: "Bhoutan",
+  BD: "Bangladesh",
+  AF: "Afghanistan",
+  IE: "Irlande",
+  EC: "Équateur",
+  CL: "Chili",
+  GT: "Guatemala",
+  BZ: "Belize",
+  KP: "Corée du Nord",
+  LY: "Libye",
+  SD: "Soudan",
+  IL: "Israël",
+  PS: "Palestine",
+  SA: "Arabie saoudite",
+  PG: "Papouasie-Nouvelle-Guinée",
+  TL: "Timor oriental",
+  GE: "Géorgie",
+  AM: "Arménie",
+  AZ: "Azerbaïdjan",
+  IR: "Iran",
+  IQ: "Irak",
+  SY: "Syrie",
+};
+
+export function getCountryLabel(countries: Country[], code: string): string {
+  const match = getCountryByCode(countries, code);
+  if (match) return match.name;
+  return EXTRA_COUNTRY_NAMES[code.toUpperCase()] ?? code.toUpperCase();
+}
+
+export function isCountryInDex(countries: Country[], code: string): boolean {
+  return getCountryByCode(countries, code) !== undefined;
+}
+
 export const TYPE_COLORS: Record<
   CountryType,
   { bg: string; text: string; border: string }

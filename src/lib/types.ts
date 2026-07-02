@@ -24,6 +24,11 @@ export type Country = {
   stats: CountryStats;
   superficie: string;
   population: string;
+  capital: string;
+  language: string;
+  currency: string;
+  /** Codes ISO alpha-2 des pays avec une frontière terrestre commune. */
+  neighbors: string[];
 };
 
 export type VisitedMap = Record<string, string>;

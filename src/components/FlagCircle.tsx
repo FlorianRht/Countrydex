@@ -1,6 +1,7 @@
 import { getFlagUrl } from "@/lib/country-utils";
 
 const SIZE_CLASS = {
+  xs: "flag-circle-xs",
   sm: "flag-circle-sm",
   md: "flag-circle-md",
   lg: "flag-circle-lg",
