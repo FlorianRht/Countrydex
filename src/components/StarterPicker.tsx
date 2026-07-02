@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
 import { countries } from "@/data/countries";
 import { getFlagUrl } from "@/lib/country-utils";
@@ -103,6 +103,7 @@ export function StarterPicker() {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("Tous");
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -128,6 +129,26 @@ export function StarterPicker() {
     () => sortedCountries.find((c) => c.code === activeCode) ?? null,
     [activeCode],
   );
+
+  const handleSelectCountry = (code: string) => {
+    setSelectedCode(code);
+  };
+
+  useEffect(() => {
+    if (!mobileDetailsOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileDetailsOpen]);
+
+  useEffect(() => {
+    if (!activeCode) return;
+    document
+      .querySelector(`[data-country-code="${activeCode}"]`)
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeCode]);
 
   return (
     <div className="explore-origin">
@@ -159,12 +180,12 @@ export function StarterPicker() {
           </div>
         </header>
 
-        <div className="mt-4 flex flex-col gap-4 lg:mt-5 xl:min-h-0 xl:flex-1 xl:overflow-hidden xl:grid xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)] xl:gap-6">
-          <section className="relative min-h-[320px] xl:h-full xl:min-h-0 xl:flex-1 xl:overflow-hidden">
+        <div className="explore-layout mt-4 lg:mt-5 xl:min-h-0 xl:flex-1">
+          <section className="explore-preview-panel hidden min-h-[320px] xl:block xl:h-full xl:min-h-0 xl:overflow-hidden">
             {selected ? (
               <OriginPreview
                 country={selected}
-                onSelectNeighbor={setSelectedCode}
+                onSelectNeighbor={handleSelectCountry}
               />
             ) : (
               <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-dex-border/60 bg-dex-panel/20">
@@ -173,7 +194,7 @@ export function StarterPicker() {
             )}
           </section>
 
-          <section className="flex flex-col rounded-2xl border border-dex-border/80 bg-dex-panel/40 backdrop-blur-md xl:h-full xl:min-h-0 xl:flex-1 xl:overflow-hidden">
+          <section className="explore-picker-panel flex flex-col rounded-2xl border border-dex-border/80 bg-dex-panel/40 backdrop-blur-md xl:h-full xl:min-h-0 xl:overflow-hidden">
             <div className="shrink-0 border-b border-dex-border/60 p-3 sm:p-4">
               <input
                 type="search"
@@ -181,30 +202,34 @@ export function StarterPicker() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un pays..."
                 className="dex-input"
+                autoComplete="off"
               />
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {REGIONS.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRegion(r)}
-                    className={`explore-region-pill ${region === r ? "explore-region-pill-active" : ""}`}
-                  >
-                    {r}
-                  </button>
-                ))}
+              <div className="explore-region-scroll mt-3">
+                <div className="explore-region-track">
+                  {REGIONS.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRegion(r)}
+                      className={`explore-region-pill shrink-0 ${region === r ? "explore-region-pill-active" : ""}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="explore-country-grid p-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+            <div className="explore-country-grid explore-country-grid-scroll p-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
               {filtered.map((country) => {
                 const isSelected = activeCode === country.code;
                 return (
                   <motion.button
                     key={country.code}
                     type="button"
+                    data-country-code={country.code}
                     layout="position"
-                    onClick={() => setSelectedCode(country.code)}
+                    onClick={() => handleSelectCountry(country.code)}
                     animate={{ scale: isSelected ? 1.02 : 1 }}
                     transition={{ duration: 0.25, ease: PREVIEW_EASE }}
                     className={`explore-country-tile ${isSelected ? "explore-country-tile-active" : ""}`}
@@ -226,7 +251,7 @@ export function StarterPicker() {
               <p className="p-8 text-center text-sm text-dex-muted">Aucun pays trouvé.</p>
             )}
 
-            <div className="shrink-0 border-t border-dex-border/60 p-3 sm:p-4">
+            <div className="explore-picker-footer hidden shrink-0 border-t border-dex-border/60 p-3 sm:p-4 xl:block">
               <p className="mb-3 text-center text-xs text-dex-muted">
                 {filtered.length} pays affichés · {sortedCountries.length} disponibles dans le dex
               </p>
@@ -252,6 +277,95 @@ export function StarterPicker() {
             </div>
           </section>
         </div>
+
+        {selected && (
+          <div className="explore-mobile-dock flex flex-col xl:hidden">
+            <button
+              type="button"
+              className="explore-mobile-dock-preview"
+              onClick={() => setMobileDetailsOpen(true)}
+              aria-expanded={mobileDetailsOpen}
+              aria-label={`Voir la fiche de ${selected.name}`}
+            >
+              <FlagCircle code={selected.code} name={selected.name} size="sm" />
+              <span className="explore-mobile-dock-text min-w-0">
+                <span className="explore-mobile-dock-name">{selected.name}</span>
+                <span className="explore-mobile-dock-meta">
+                  {selected.region} · #{selected.code}
+                </span>
+              </span>
+              <span className="explore-mobile-dock-chevron" aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 15l-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </button>
+
+            <form action={formAction} className="explore-mobile-dock-form">
+              {state.error && (
+                <p className="mb-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-200">
+                  {state.error}
+                </p>
+              )}
+              <input type="hidden" name="birthCountryCode" value={activeCode ?? ""} />
+              <button
+                type="submit"
+                disabled={pending || !activeCode}
+                className="explore-confirm explore-mobile-confirm w-full"
+              >
+                {pending ? "Ouverture..." : partirDePays(selected.name, selected.code)}
+              </button>
+            </form>
+          </div>
+        )}
+
+        <AnimatePresence>
+          {mobileDetailsOpen && selected && (
+            <div className="explore-mobile-sheet-root xl:hidden">
+              <motion.button
+                type="button"
+                className="explore-mobile-sheet-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                aria-label="Fermer la fiche pays"
+                onClick={() => setMobileDetailsOpen(false)}
+              />
+              <motion.div
+                className="explore-mobile-sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Fiche pays — ${selected.name}`}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ duration: 0.32, ease: PREVIEW_EASE }}
+              >
+                <div className="explore-mobile-sheet-handle" aria-hidden />
+                <div className="explore-mobile-sheet-header">
+                  <p className="explore-mobile-sheet-title">Fiche pays</p>
+                  <button
+                    type="button"
+                    className="explore-mobile-sheet-close"
+                    onClick={() => setMobileDetailsOpen(false)}
+                  >
+                    Fermer
+                  </button>
+                </div>
+                <div className="explore-mobile-sheet-body">
+                  <OriginPreview
+                    country={selected}
+                    onSelectNeighbor={(code) => {
+                      handleSelectCountry(code);
+                    }}
+                    mobile
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -260,14 +374,18 @@ export function StarterPicker() {
 function OriginPreview({
   country,
   onSelectNeighbor,
+  mobile = false,
 }: {
   country: Country;
   onSelectNeighbor?: (code: string) => void;
+  mobile?: boolean;
 }) {
   const glow = REGION_GLOW[country.region] ?? "rgba(148, 163, 184, 0.3)";
 
   return (
-    <article className="explore-preview relative flex h-full flex-col overflow-hidden rounded-2xl border border-dex-border/70 xl:min-h-0">
+    <article
+      className={`explore-preview relative flex flex-col overflow-hidden rounded-2xl border border-dex-border/70 ${mobile ? "explore-preview-mobile" : "h-full xl:min-h-0"}`}
+    >
       <motion.div
         className="explore-preview-glow"
         animate={{ opacity: 1 }}
@@ -281,7 +399,7 @@ function OriginPreview({
           <div className="explore-flag-frame relative w-full">
             <CrossfadeSlot
               slotKey={country.code}
-              className="aspect-[5/3] w-full"
+              className={mobile ? "aspect-[2/1] w-full" : "aspect-[5/3] w-full"}
               layerClassName="explore-flag-reveal h-full overflow-hidden rounded-xl shadow-2xl"
               inset
             >
@@ -318,19 +436,21 @@ function OriginPreview({
             </div>
           </CrossfadeSlot>
 
-          <CountryMap
-            code={country.code}
-            name={country.name}
-            fill
-            className="mt-5 min-h-0 flex-1"
-          />
+          {!mobile && (
+            <CountryMap
+              code={country.code}
+              name={country.name}
+              fill
+              className="mt-5 min-h-0 flex-1"
+            />
+          )}
         </div>
 
         <CrossfadeSlot
           slotKey={country.code}
-          className="explore-dossier-crossfade min-h-0 xl:flex-1"
+          className={mobile ? "explore-dossier-crossfade-mobile" : "explore-dossier-crossfade min-h-0 xl:flex-1"}
           layerClassName="explore-preview-dossier"
-          inset
+          inset={!mobile}
         >
           <section className="explore-preview-section">
             <h3 className="explore-preview-section-title">Description</h3>
