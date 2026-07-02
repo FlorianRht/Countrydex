@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { buildHighlightedWorldMapSvg, fetchWorldMapSvg } from "@/lib/world-map";
+import { getWorldMapHighlightId } from "@/lib/country-utils";
 
 type CountryWorldMapProps = {
   code: string;
@@ -54,7 +55,7 @@ export function CountryWorldMap({ code, name }: CountryWorldMapProps) {
   const [displaySvg, setDisplaySvg] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const highlightId = code.toLowerCase();
+  const highlightId = getWorldMapHighlightId(code);
 
   useEffect(() => {
     setMounted(true);

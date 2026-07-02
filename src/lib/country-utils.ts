@@ -1,12 +1,34 @@
 import type { Country, CountryType } from "./types";
 
+/** Codes ISO subdivisions UK → assets flagcdn / carte monde. */
+const UK_NATION_ASSETS: Record<string, { flag: string; map: string; world: string }> = {
+  ENG: { flag: "gb-eng", map: "gb", world: "gb" },
+  SCO: { flag: "gb-sct", map: "gb", world: "gb" },
+  WAL: { flag: "gb-wls", map: "gb", world: "gb" },
+  NIR: { flag: "gb-nir", map: "gb", world: "gb" },
+};
+
+function getNationAssets(code: string) {
+  return UK_NATION_ASSETS[code.toUpperCase()];
+}
+
 export function getFlagUrl(code: string): string {
-  return `https://flagcdn.com/${code.toLowerCase()}.svg`;
+  const assets = getNationAssets(code);
+  const flagCode = assets?.flag ?? code.toLowerCase();
+  return `https://flagcdn.com/${flagCode}.svg`;
 }
 
 /** Silhouette vectorielle du pays (mapsicon, MIT). */
 export function getCountryMapUrl(code: string): string {
-  return `https://cdn.jsdelivr.net/gh/djaiss/mapsicon@master/all/${code.toLowerCase()}/vector.svg`;
+  const assets = getNationAssets(code);
+  const mapCode = assets?.map ?? code.toLowerCase();
+  return `https://cdn.jsdelivr.net/gh/djaiss/mapsicon@master/all/${mapCode}/vector.svg`;
+}
+
+/** Identifiant SVG pour surligner le pays sur la carte mondiale. */
+export function getWorldMapHighlightId(code: string): string {
+  const assets = getNationAssets(code);
+  return assets?.world ?? code.toLowerCase();
 }
 
 export function getCountryByCode(
@@ -16,65 +38,9 @@ export function getCountryByCode(
   return countries.find((c) => c.code.toLowerCase() === code.toLowerCase());
 }
 
-/** Noms pour les pays frontaliers absents du dex (ISO alpha-2). */
-const EXTRA_COUNTRY_NAMES: Record<string, string> = {
-  DE: "Allemagne",
-  BE: "Belgique",
-  LU: "Luxembourg",
-  MC: "Monaco",
-  AD: "Andorre",
-  AT: "Autriche",
-  SI: "Slovénie",
-  SM: "Saint-Marin",
-  VA: "Vatican",
-  LI: "Liechtenstein",
-  AL: "Albanie",
-  MK: "Macédoine du Nord",
-  BG: "Bulgarie",
-  DZ: "Algérie",
-  AR: "Argentine",
-  UY: "Uruguay",
-  PY: "Paraguay",
-  CO: "Colombie",
-  VE: "Venezuela",
-  GY: "Guyana",
-  SR: "Suriname",
-  BO: "Bolivie",
-  MY: "Malaisie",
-  LA: "Laos",
-  KH: "Cambodge",
-  MM: "Myanmar",
-  CN: "Chine",
-  PK: "Pakistan",
-  NP: "Népal",
-  BT: "Bhoutan",
-  BD: "Bangladesh",
-  AF: "Afghanistan",
-  IE: "Irlande",
-  EC: "Équateur",
-  CL: "Chili",
-  GT: "Guatemala",
-  BZ: "Belize",
-  KP: "Corée du Nord",
-  LY: "Libye",
-  SD: "Soudan",
-  IL: "Israël",
-  PS: "Palestine",
-  SA: "Arabie saoudite",
-  PG: "Papouasie-Nouvelle-Guinée",
-  TL: "Timor oriental",
-  GE: "Géorgie",
-  AM: "Arménie",
-  AZ: "Azerbaïdjan",
-  IR: "Iran",
-  IQ: "Irak",
-  SY: "Syrie",
-};
-
 export function getCountryLabel(countries: Country[], code: string): string {
   const match = getCountryByCode(countries, code);
-  if (match) return match.name;
-  return EXTRA_COUNTRY_NAMES[code.toUpperCase()] ?? code.toUpperCase();
+  return match ? match.name : code.toUpperCase();
 }
 
 export function isCountryInDex(countries: Country[], code: string): boolean {

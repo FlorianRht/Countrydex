@@ -25,7 +25,10 @@ const PREPOSITION_BY_CODE: Record<string, string> = {
   CA: "du Canada",
   ID: "d'Indonésie",
   TR: "de Turquie",
-  GB: "du Royaume-Uni",
+  ENG: "d'Angleterre",
+  SCO: "d'Écosse",
+  WAL: "du Pays de Galles",
+  NIR: "d'Irlande du Nord",
   PE: "du Pérou",
 };
 
