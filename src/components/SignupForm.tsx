@@ -40,6 +40,27 @@ export function SignupForm() {
         )}
 
         <div>
+          <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-dex-cream">
+            Pseudo
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            minLength={3}
+            maxLength={20}
+            pattern="[a-zA-Z0-9_-]+"
+            autoComplete="username"
+            className="dex-input"
+            placeholder="mon_pseudo"
+          />
+          <p className="mt-1.5 text-xs text-dex-muted">
+            3 à 20 caractères — lettres, chiffres, tirets et underscores.
+          </p>
+        </div>
+
+        <div>
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-dex-cream">
             Email
           </label>

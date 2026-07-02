@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
 import { countries } from "@/data/countries";
 import { getFlagUrl } from "@/lib/country-utils";
 import { partirDePays } from "@/lib/french";
 import type { Country } from "@/lib/types";
-import { completeOnboarding, signOut, type AuthActionState } from "@/app/actions/auth";
+import { completeOnboarding, type AuthActionState } from "@/app/actions/auth";
+import { useAuth } from "@/lib/auth-context";
 import { FlagCircle } from "./FlagCircle";
 import { CountryMap } from "./CountryMap";
 import { CountryNeighbors } from "./CountryNeighbors";
@@ -14,6 +16,8 @@ import { CountryQuickFacts } from "./CountryQuickFacts";
 import { CountryWorldMap } from "./CountryWorldMap";
 import { TypeBadge } from "./TypeBadge";
 import { StatBars } from "./StatBars";
+import { UsernameModal } from "./UsernameModal";
+import { normalizeUsername, validateUsername } from "@/lib/auth/username";
 
 const sortedCountries = [...countries].sort((a, b) =>
   a.name.localeCompare(b.name, "fr"),
@@ -100,7 +104,12 @@ function CrossfadeSlot({
 
 export function StarterPicker() {
   const [state, formAction, pending] = useActionState(completeOnboarding, initialState);
+  const { user, refreshProfile, signOut } = useAuth();
+  const router = useRouter();
+  const onboardingDoneRef = useRef(false);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [username, setUsername] = useState("");
+  const [usernameReady, setUsernameReady] = useState(false);
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("Tous");
   const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
@@ -136,18 +145,58 @@ export function StarterPicker() {
     [activeCode],
   );
 
+  const canSubmit = usernameReady && Boolean(activeCode) && username.trim().length >= 3;
+
+  useEffect(() => {
+    if (!user || usernameReady) return;
+
+    const fromMetadata =
+      typeof user.user_metadata?.username === "string"
+        ? normalizeUsername(user.user_metadata.username)
+        : "";
+
+    if (fromMetadata && !validateUsername(fromMetadata)) {
+      setUsername(fromMetadata);
+      setUsernameReady(true);
+    }
+  }, [user, usernameReady]);
+
+  const handleUsernameConfirm = (confirmedUsername: string) => {
+    setUsername(confirmedUsername);
+    setUsernameReady(true);
+  };
+
   const handleSelectCountry = (code: string) => {
     setSelectedCode(code);
   };
 
+  const handleSignOut = () => {
+    void signOut().then(() => {
+      router.replace("/");
+      router.refresh();
+    });
+  };
+
   useEffect(() => {
-    if (!mobileDetailsOpen) return;
+    if (!state.success || onboardingDoneRef.current) return;
+
+    onboardingDoneRef.current = true;
+
+    void refreshProfile().then(() => {
+      router.replace("/dex");
+      router.refresh();
+    });
+  }, [state.success, refreshProfile, router]);
+
+  useEffect(() => {
+    if (usernameReady && !mobileDetailsOpen) return;
+
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [mobileDetailsOpen]);
+  }, [usernameReady, mobileDetailsOpen]);
 
   useEffect(() => {
     if (!selectedCode) return;
@@ -167,7 +216,21 @@ export function StarterPicker() {
       <div className="explore-grid-bg" aria-hidden />
       <div className="explore-horizon" aria-hidden />
 
-      <div className="relative flex w-full flex-col px-5 py-5 sm:px-8 lg:px-10 lg:py-6 xl:h-full xl:overflow-hidden">
+      {user && !usernameReady && (
+        <UsernameModal
+          initialValue={
+            typeof user.user_metadata?.username === "string" ? user.user_metadata.username : ""
+          }
+          onConfirm={handleUsernameConfirm}
+          onSignOut={handleSignOut}
+        />
+      )}
+
+      <div
+        className={`relative flex w-full flex-col px-5 py-5 sm:px-8 lg:px-10 lg:py-6 xl:h-full xl:overflow-hidden ${
+          !usernameReady ? "explore-origin-locked" : ""
+        }`}
+      >
         <header className="explore-header shrink-0">
           <div className="explore-header-main">
             <div className="min-w-0">
@@ -180,15 +243,13 @@ export function StarterPicker() {
           </div>
 
           <div className="explore-header-actions">
-            <form action={signOut}>
-              <button type="submit" className="explore-header-signout">
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Déconnexion
-              </button>
-            </form>
+            <button type="button" onClick={handleSignOut} className="explore-header-signout">
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Déconnexion
+            </button>
           </div>
         </header>
 
@@ -275,9 +336,10 @@ export function StarterPicker() {
                   </p>
                 )}
                 <input type="hidden" name="birthCountryCode" value={activeCode ?? ""} />
+                <input type="hidden" name="username" value={username.trim()} />
                 <button
                   type="submit"
-                  disabled={pending || !activeCode}
+                  disabled={pending || !canSubmit}
                   className="explore-confirm w-full"
                 >
                   {pending
@@ -321,9 +383,10 @@ export function StarterPicker() {
                 </p>
               )}
               <input type="hidden" name="birthCountryCode" value={activeCode ?? ""} />
+              <input type="hidden" name="username" value={username.trim()} />
               <button
                 type="submit"
-                disabled={pending || !activeCode}
+                disabled={pending || !canSubmit}
                 className="explore-confirm explore-mobile-confirm w-full"
               >
                 {pending ? "Ouverture..." : partirDePays(selected.name, selected.code)}

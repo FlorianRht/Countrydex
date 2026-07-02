@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { countries } from "@/data/countries";
 import { getCountryByCode } from "@/lib/country-utils";
+import { normalizeUsername } from "@/lib/auth/username";
 
 export function isValidBirthCountry(code: string): boolean {
   return Boolean(getCountryByCode(countries, code));
@@ -10,8 +11,10 @@ export async function setupStarterProfile(
   supabase: SupabaseClient,
   userId: string,
   birthCountryCode: string,
+  username: string,
 ) {
   const code = birthCountryCode.trim().toUpperCase();
+  const normalizedUsername = normalizeUsername(username);
 
   if (!isValidBirthCountry(code)) {
     throw new Error("Pays de naissance invalide.");
@@ -29,6 +32,7 @@ export async function setupStarterProfile(
 
   const { error: profileError } = await supabase.from("profiles").insert({
     id: userId,
+    username: normalizedUsername,
     birth_country_code: code,
   });
 
@@ -47,7 +51,10 @@ export async function setupStarterProfile(
   }
 
   await supabase.auth.updateUser({
-    data: { birth_country_code: code },
+    data: {
+      birth_country_code: code,
+      username: normalizedUsername,
+    },
   });
 
   return { alreadyExists: false as const };

@@ -6,11 +6,44 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 import { getPostAuthPath } from "@/lib/auth/redirect";
 import { setupStarterProfile, isValidBirthCountry } from "@/lib/auth/setup-profile";
+import {
+  formatUsernameError,
+  isUsernameTaken,
+  normalizeUsername,
+  validateUsername,
+} from "@/lib/auth/username";
 
 export type AuthActionState = {
   error?: string;
   success?: string;
 };
+
+function formatAuthError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+
+  if (
+    message.includes("profiles") &&
+    (message.includes("schema cache") || message.includes("does not exist"))
+  ) {
+    return "La base Supabase n'est pas initialisée. Ouvre Supabase → SQL Editor, exécute le fichier supabase/schema.sql, puis réessaie.";
+  }
+
+  if (
+    message.includes("username") &&
+    (message.includes("schema cache") || message.includes("does not exist"))
+  ) {
+    return "La colonne pseudo n'existe pas encore. Exécute la migration dans supabase/schema.sql, puis réessaie.";
+  }
+
+  if (
+    message.includes("visited_countries") &&
+    (message.includes("schema cache") || message.includes("does not exist"))
+  ) {
+    return "La base Supabase n'est pas initialisée. Ouvre Supabase → SQL Editor, exécute le fichier supabase/schema.sql, puis réessaie.";
+  }
+
+  return formatUsernameError(message) || message || "Impossible de finaliser le profil.";
+}
 
 export async function signUp(
   _prevState: AuthActionState,
@@ -23,9 +56,15 @@ export async function signUp(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const username = normalizeUsername(String(formData.get("username") ?? ""));
 
   if (!email || !password) {
     return { error: "Email et mot de passe requis." };
+  }
+
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    return { error: usernameError };
   }
 
   if (password.length < 6) {
@@ -37,11 +76,21 @@ export async function signUp(
   }
 
   const supabase = await createClient();
+
+  try {
+    if (await isUsernameTaken(supabase, username)) {
+      return { error: "Ce pseudo est déjà pris." };
+    }
+  } catch (error) {
+    return { error: formatAuthError(error) };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${getSiteUrl()}/auth/callback`,
+      data: { username },
     },
   });
 
@@ -117,6 +166,40 @@ export async function signInWithGoogle(formData: FormData) {
   redirect("/login?error=google");
 }
 
+export async function checkOnboardingUsername(
+  input: string,
+): Promise<{ error?: string; username?: string }> {
+  if (!isSupabaseConfigured()) {
+    return { error: "Supabase n'est pas configuré." };
+  }
+
+  const username = normalizeUsername(input);
+  const usernameError = validateUsername(username);
+
+  if (usernameError) {
+    return { error: usernameError };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Session expirée. Reconnecte-toi." };
+  }
+
+  try {
+    if (await isUsernameTaken(supabase, username, user.id)) {
+      return { error: "Ce pseudo est déjà pris." };
+    }
+  } catch (error) {
+    return { error: formatAuthError(error) };
+  }
+
+  return { username };
+}
+
 export async function completeOnboarding(
   _prevState: AuthActionState,
   formData: FormData,
@@ -128,6 +211,7 @@ export async function completeOnboarding(
   const birthCountryCode = String(formData.get("birthCountryCode") ?? "")
     .trim()
     .toUpperCase();
+  const username = normalizeUsername(String(formData.get("username") ?? ""));
 
   if (!birthCountryCode) {
     return { error: "Choisis ton pays de naissance." };
@@ -135,6 +219,11 @@ export async function completeOnboarding(
 
   if (!isValidBirthCountry(birthCountryCode)) {
     return { error: "Pays de naissance invalide." };
+  }
+
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    return { error: usernameError };
   }
 
   const supabase = await createClient();
@@ -147,15 +236,17 @@ export async function completeOnboarding(
   }
 
   try {
-    await setupStarterProfile(supabase, user.id, birthCountryCode);
+    if (await isUsernameTaken(supabase, username, user.id)) {
+      return { error: "Ce pseudo est déjà pris." };
+    }
+
+    await setupStarterProfile(supabase, user.id, birthCountryCode, username);
   } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "Impossible de finaliser le profil.",
-    };
+    return { error: formatAuthError(error) };
   }
 
   revalidatePath("/", "layout");
-  redirect("/dex");
+  return { success: "done" };
 }
 
 export async function signOut() {

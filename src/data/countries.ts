@@ -12,3 +12,15 @@ export const countries: Country[] = [
   ...amerique,
   ...oceanie,
 ];
+
+const dexNumberByCode = new Map(
+  countries.map((country, index) => [country.code.toUpperCase(), index + 1]),
+);
+
+export function getDexNumber(code: string): number {
+  return dexNumberByCode.get(code.toUpperCase()) ?? 0;
+}
+
+export function formatDexId(code: string): string {
+  return String(getDexNumber(code)).padStart(3, "0");
+}

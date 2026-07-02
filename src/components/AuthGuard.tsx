@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
@@ -15,9 +15,11 @@ function isProtectedPath(pathname: string) {
 }
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading, profileLoaded, birthCountryCode, configured } = useAuth();
+  const { user, loading, profileLoaded, birthCountryCode, configured, refreshProfile } =
+    useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const recheckAttempted = useRef(false);
 
   useEffect(() => {
     if (!configured || loading) return;
@@ -28,6 +30,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const protectedPath = isProtectedPath(pathname);
 
     if (!user) {
+      recheckAttempted.current = false;
       if (!isGuestPath && !isAuthCallback) {
         router.replace("/");
       }
@@ -37,11 +40,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!profileLoaded) return;
 
     if (!birthCountryCode) {
+      if (!isSetupPath && !recheckAttempted.current) {
+        recheckAttempted.current = true;
+        void refreshProfile();
+        return;
+      }
+
       if (!isSetupPath) {
         router.replace("/onboarding");
       }
       return;
     }
+
+    recheckAttempted.current = false;
 
     if (isGuestPath || isSetupPath) {
       router.replace("/dex");
@@ -56,6 +67,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     birthCountryCode,
     pathname,
     router,
+    refreshProfile,
   ]);
 
   if (configured && (loading || (user && !profileLoaded))) {
