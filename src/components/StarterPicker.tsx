@@ -122,11 +122,17 @@ export function StarterPicker() {
     if (selectedCode && filtered.some((c) => c.code === selectedCode)) {
       return selectedCode;
     }
-    return filtered[0]?.code ?? null;
-  }, [selectedCode, filtered]);
+    if (filtered.length === 1) {
+      return filtered[0].code;
+    }
+    if (!search.trim()) {
+      return filtered[0]?.code ?? null;
+    }
+    return null;
+  }, [selectedCode, filtered, search]);
 
   const selected = useMemo(
-    () => sortedCountries.find((c) => c.code === activeCode) ?? null,
+    () => (activeCode ? sortedCountries.find((c) => c.code === activeCode) ?? null : null),
     [activeCode],
   );
 
@@ -144,11 +150,17 @@ export function StarterPicker() {
   }, [mobileDetailsOpen]);
 
   useEffect(() => {
-    if (!activeCode) return;
-    document
-      .querySelector(`[data-country-code="${activeCode}"]`)
-      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [activeCode]);
+    if (!selectedCode) return;
+    if (!filtered.some((c) => c.code === selectedCode)) return;
+
+    const frame = requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-country-code="${selectedCode}"]`)
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [selectedCode, filtered]);
 
   return (
     <div className="explore-origin">
@@ -188,8 +200,12 @@ export function StarterPicker() {
                 onSelectNeighbor={handleSelectCountry}
               />
             ) : (
-              <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-dex-border/60 bg-dex-panel/20">
-                <p className="text-sm text-dex-muted">Aucun pays disponible.</p>
+              <div className="flex h-full min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-dex-border/60 bg-dex-panel/20 p-6 text-center">
+                <p className="text-sm text-dex-muted">
+                  {search.trim()
+                    ? "Sélectionne un pays dans la liste pour voir sa fiche."
+                    : "Aucun pays disponible."}
+                </p>
               </div>
             )}
           </section>
@@ -224,14 +240,11 @@ export function StarterPicker() {
               {filtered.map((country) => {
                 const isSelected = activeCode === country.code;
                 return (
-                  <motion.button
+                  <button
                     key={country.code}
                     type="button"
                     data-country-code={country.code}
-                    layout="position"
                     onClick={() => handleSelectCountry(country.code)}
-                    animate={{ scale: isSelected ? 1.02 : 1 }}
-                    transition={{ duration: 0.25, ease: PREVIEW_EASE }}
                     className={`explore-country-tile ${isSelected ? "explore-country-tile-active" : ""}`}
                   >
                     <span className="explore-country-tile-flag">
@@ -242,7 +255,7 @@ export function StarterPicker() {
                     </span>
                     <span className="explore-country-tile-name">{country.name}</span>
                     <span className="explore-country-tile-region">{country.region}</span>
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
