@@ -1,0 +1,268 @@
+import type { Country } from "@/lib/types";
+
+export const countries: Country[] = [
+  {
+    code: "FR",
+    name: "France",
+    region: "Europe",
+    types: ["Gastronomie", "Historique", "Urbain"],
+    description:
+      "Un pays légendaire aux mille saveurs. On raconte que ses ruelles pavées murmurent des histoires de rois, de révolutionnaires et de boulangers légendaires. Très réactif quand on lui propose un bon fromage.",
+    stats: { culture: 95, gastronomie: 98, aventure: 70, nature: 75 },
+    superficie: "643 801 km²",
+    population: "68 M",
+  },
+  {
+    code: "JP",
+    name: "Japon",
+    region: "Asie",
+    types: ["Urbain", "Historique", "Gastronomie"],
+    description:
+      "Créature fascinante née entre temples anciens et néons futuristes. Capable de passer d'un train ultra-rapide à un jardin zen en un clin d'œil. Attaque spéciale : ramen à minuit.",
+    stats: { culture: 97, gastronomie: 96, aventure: 85, nature: 80 },
+    superficie: "377 975 km²",
+    population: "125 M",
+  },
+  {
+    code: "IT",
+    name: "Italie",
+    region: "Europe",
+    types: ["Historique", "Gastronomie", "Urbain"],
+    description:
+      "Forme de botte, tempérament volcanique. Ce pays collectionne les monuments comme d'autres collectionnent des badges. Faible contre les régimes, fort contre la faim.",
+    stats: { culture: 94, gastronomie: 97, aventure: 72, nature: 78 },
+    superficie: "301 340 km²",
+    population: "59 M",
+  },
+  {
+    code: "ES",
+    name: "Espagne",
+    region: "Europe",
+    types: ["Plage", "Gastronomie", "Historique"],
+    description:
+      "Baigné de soleil et de rythmes endiablés. Évolue facilement entre sieste stratégique et fiesta jusqu'à l'aube. Type Plage dominant en été.",
+    stats: { culture: 88, gastronomie: 90, aventure: 80, nature: 82 },
+    superficie: "505 990 km²",
+    population: "48 M",
+  },
+  {
+    code: "TH",
+    name: "Thaïlande",
+    region: "Asie",
+    types: ["Plage", "Gastronomie", "Nature"],
+    description:
+      "Le sourire est son arme secrète. Habitat naturel : marchés nocturnes et eaux turquoise. Les voyageurs rapportent une addiction immédiate au pad thaï.",
+    stats: { culture: 85, gastronomie: 94, aventure: 88, nature: 90 },
+    superficie: "513 120 km²",
+    population: "71 M",
+  },
+  {
+    code: "MA",
+    name: "Maroc",
+    region: "Afrique",
+    types: ["Désert", "Historique", "Gastronomie"],
+    description:
+      "Mystérieux et parfumé. Ses médinas sont des labyrinthes où se cachent des trésors artisanaux. Résiste bien à la chaleur, vulnérable aux tajines trop bons.",
+    stats: { culture: 90, gastronomie: 88, aventure: 92, nature: 75 },
+    superficie: "710 850 km²",
+    population: "37 M",
+  },
+  {
+    code: "IS",
+    name: "Islande",
+    region: "Europe",
+    types: ["Nature", "Montagne"],
+    description:
+      "Pays élémentaire aux pouvoirs géothermiques. Geysers, glaciers et aurores boréales composent son moveset. Population rare mais redoutablement accueillante.",
+    stats: { culture: 78, gastronomie: 65, aventure: 98, nature: 100 },
+    superficie: "103 000 km²",
+    population: "380 K",
+  },
+  {
+    code: "US",
+    name: "États-Unis",
+    region: "Amérique",
+    types: ["Urbain", "Nature", "Désert"],
+    description:
+      "Géant aux habitats variés, du canyon au gratte-ciel. Capable de traverser six fuseaux horaires sans évoluer. Attaque signature : road trip interminable.",
+    stats: { culture: 86, gastronomie: 78, aventure: 95, nature: 92 },
+    superficie: "9,8 M km²",
+    population: "335 M",
+  },
+  {
+    code: "BR",
+    name: "Brésil",
+    region: "Amérique",
+    types: ["Plage", "Nature", "Urbain"],
+    description:
+      "Énergie carnavalesque et forêts immenses. Son cri de combat ressemble à de la samba. Type Plage et Nature en fusion lors de la Coupe du monde.",
+    stats: { culture: 87, gastronomie: 82, aventure: 90, nature: 96 },
+    superficie: "8,5 M km²",
+    population: "215 M",
+  },
+  {
+    code: "GR",
+    name: "Grèce",
+    region: "Europe",
+    types: ["Historique", "Plage", "Insulaire"],
+    description:
+      "Berceau de mythes et de moussaka. Ses îles scintillent comme des étoiles en Méditerranée. Faible en hiver, invincible avec un coucher de soleil sur Santorin.",
+    stats: { culture: 96, gastronomie: 89, aventure: 78, nature: 85 },
+    superficie: "131 957 km²",
+    population: "10 M",
+  },
+  {
+    code: "PT",
+    name: "Portugal",
+    region: "Europe",
+    types: ["Plage", "Historique", "Gastronomie"],
+    description:
+      "Petit mais charismatique. Surf le matin, pastéis de nata l'après-midi. Ancien empire maritime désormais expert en dolce far niente.",
+    stats: { culture: 84, gastronomie: 88, aventure: 76, nature: 80 },
+    superficie: "92 212 km²",
+    population: "10 M",
+  },
+  {
+    code: "VN",
+    name: "Vietnam",
+    region: "Asie",
+    types: ["Gastronomie", "Nature", "Historique"],
+    description:
+      "Silhouette en S, caractère en zigzag. Ses rizières en terrasses hypnotisent les adversaires. Combo ultime : pho bouillant + scooter dans Hanoï.",
+    stats: { culture: 88, gastronomie: 95, aventure: 90, nature: 88 },
+    superficie: "331 212 km²",
+    population: "100 M",
+  },
+  {
+    code: "AU",
+    name: "Australie",
+    region: "Océanie",
+    types: ["Nature", "Plage", "Désert"],
+    description:
+      "Continent-insulaire peuplé de créatures improbables. Habitat : outback rouge ou côte surfée. Distance entre deux villes : niveau boss final.",
+    stats: { culture: 80, gastronomie: 72, aventure: 97, nature: 98 },
+    superficie: "7,7 M km²",
+    population: "27 M",
+  },
+  {
+    code: "NZ",
+    name: "Nouvelle-Zélande",
+    region: "Océanie",
+    types: ["Nature", "Montagne", "Insulaire"],
+    description:
+      "Terre de moyenne‑terre grandeur nature. Fjords, volcans et hobbits cohabitent en harmonie. Bonus passif : paysages de film à chaque virage.",
+    stats: { culture: 75, gastronomie: 70, aventure: 99, nature: 100 },
+    superficie: "268 838 km²",
+    population: "5 M",
+  },
+  {
+    code: "CH",
+    name: "Suisse",
+    region: "Europe",
+    types: ["Montagne", "Nature", "Urbain"],
+    description:
+      "Pic altier entouré de lacs miroirs. Précision horlogère et chocolat fondu. Évolue rarement mais toujours au sommet.",
+    stats: { culture: 82, gastronomie: 85, aventure: 88, nature: 95 },
+    superficie: "41 285 km²",
+    population: "9 M",
+  },
+  {
+    code: "MX",
+    name: "Mexique",
+    region: "Amérique",
+    types: ["Historique", "Gastronomie", "Plage"],
+    description:
+      "Explosion de couleurs et de saveurs. Ruines mayas le jour, tacos al pastor la nuit. Résiste aux épices, pas à la musique mariachi.",
+    stats: { culture: 92, gastronomie: 93, aventure: 85, nature: 80 },
+    superficie: "1,96 M km²",
+    population: "130 M",
+  },
+  {
+    code: "KR",
+    name: "Corée du Sud",
+    region: "Asie",
+    types: ["Urbain", "Gastronomie", "Historique"],
+    description:
+      "Vitesse urbaine et K-culture mondiale. Séoul ne dort jamais, le kimchi non plus. Combo pop culture + palais royaux déstabilise l'ennemi.",
+    stats: { culture: 90, gastronomie: 92, aventure: 80, nature: 70 },
+    superficie: "100 363 km²",
+    population: "52 M",
+  },
+  {
+    code: "EG",
+    name: "Égypte",
+    region: "Afrique",
+    types: ["Historique", "Désert"],
+    description:
+      "Gardien des pyramides et du Nil éternel. Sable, sphinx et barges au coucher du soleil. Attaque ancestrale : émerveillement millénaire.",
+    stats: { culture: 98, gastronomie: 75, aventure: 88, nature: 60 },
+    superficie: "1 M km²",
+    population: "110 M",
+  },
+  {
+    code: "IN",
+    name: "Inde",
+    region: "Asie",
+    types: ["Historique", "Gastronomie", "Urbain"],
+    description:
+      "Chaos coloré et spiritualité intense. Un pays, mille saveurs, un milliard d'histoires. Capacité spéciale : réveil des sens en surcharge.",
+    stats: { culture: 99, gastronomie: 96, aventure: 92, nature: 78 },
+    superficie: "3,3 M km²",
+    population: "1,4 Md",
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    region: "Amérique",
+    types: ["Nature", "Montagne", "Urbain"],
+    description:
+      "Immensité polie et politesse légendaire. Érables, lacs et aurores boréales. Évolution finale : road trip de 6 000 km sans ennui.",
+    stats: { culture: 78, gastronomie: 74, aventure: 94, nature: 99 },
+    superficie: "9,98 M km²",
+    population: "41 M",
+  },
+  {
+    code: "ID",
+    name: "Indonésie",
+    region: "Asie",
+    types: ["Insulaire", "Plage", "Nature"],
+    description:
+      "Archipel de 17 000 îles, impossible à capturer en un seul voyage. Volcans fumants et rizières vertes. Habitat idéal pour les chasseurs de lever de soleil.",
+    stats: { culture: 86, gastronomie: 87, aventure: 93, nature: 97 },
+    superficie: "1,9 M km²",
+    population: "280 M",
+  },
+  {
+    code: "TR",
+    name: "Turquie",
+    region: "Asie",
+    types: ["Historique", "Gastronomie", "Plage"],
+    description:
+      "Pont entre deux continents, tempérament fougueux. Mosquées bleues, bazars et bords de mer. Faible aux loukoums, fort en kebab.",
+    stats: { culture: 93, gastronomie: 91, aventure: 84, nature: 76 },
+    superficie: "783 562 km²",
+    population: "86 M",
+  },
+  {
+    code: "GB",
+    name: "Royaume-Uni",
+    region: "Europe",
+    types: ["Historique", "Urbain"],
+    description:
+      "Île brumeuse aux traditions royales et pubs chaleureux. Londres pulse jour et nuit, la campagne garde ses secrets. Résiste bien à la pluie.",
+    stats: { culture: 91, gastronomie: 76, aventure: 74, nature: 72 },
+    superficie: "243 610 km²",
+    population: "68 M",
+  },
+  {
+    code: "PE",
+    name: "Pérou",
+    region: "Amérique",
+    types: ["Montagne", "Historique", "Gastronomie"],
+    description:
+      "Machu Picchu couronne ce pays andin. Lamas, ceviche et mystère inca. Altitude élevée : prévoir acclimatation avant le combat.",
+    stats: { culture: 94, gastronomie: 90, aventure: 96, nature: 92 },
+    superficie: "1,29 M km²",
+    population: "34 M",
+  },
+];
